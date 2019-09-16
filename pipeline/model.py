@@ -2,6 +2,7 @@ from . import config
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, create_engine
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import logging
 
 STATE_WAITING = 0
 STATE_RUNNING = 1
@@ -38,8 +39,8 @@ class Vertex(Base):
 
     graph = relationship('Graph')
     #从顶点查看它的边,这里必须使用foreign_keys, 其值必须使用引号
-    tails = relationship('Edge', Foreign_keys='[Edge.tail]')
-    heads = relationship('Edge', Foreign_keys='Edge.head')
+    tails = relationship('Edge', foreign_keys='[Edge.tail]')
+    heads = relationship('Edge', foreign_keys='Edge.head')
 
 
 #边表
@@ -78,15 +79,29 @@ class Track(Base):
     vertex = relationship('Vertex')
     pipeline = relationship('Pipeline')
 
+#封装数据库的引擎,会话到类中,使用单例模式
 class Database:
     _engine = create_engine(config.URL, echo=config.DATABASE_DEBUG)  #属性的单实例,类加载时候即创建连接
     _Session = sessionmaker(bind=_engine)
     _session = _Session()
 
+    @property
+    def session(self):
+        return self._session
 
+    @property
+    def engine(self):
+        return self._engine
 
+    #创建表
+    def create_all(self):
+        Base.metadata.create_all(self._engine)
 
+    #删除表
+    def drop_all(self):
+        Base.metadata.drop_all(self._engine)
 
+db = Database()
 
 
 
