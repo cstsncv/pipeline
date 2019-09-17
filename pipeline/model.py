@@ -21,6 +21,8 @@ class Graph(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(32), nullable=False, unique=True)
     desc = Column(String(128), nullable=True)
+    checked = Column(Integer, default=0, nullable=False) #检测为合法DAG后改为1,DAG定义或修改后就立即进行DAG检验
+    sealed = Column(Integer, default=0, nullable=False)  #DAG有流程用过后+1,设置后表示不能修改及删除
 
     #经常从图查看所有的顶点,边的信息
     vertexes = relationship('Vertex')
